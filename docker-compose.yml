@@ -1,0 +1,36 @@
+# CATATAN: File ini untuk setup lengkap dengan database internal
+# Untuk database eksternal, gunakan docker-compose.standalone.yml
+
+services:
+
+  # Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: p2-oc-api
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      # Database configuration - menggunakan alamat IP host pada Linux
+      - DB_HOST=165.22.97.18
+      - DB_PORT=3306
+      - DB_USER=kelompok1
+      - DB_PASSWORD=kelompok1
+      - DB_NAME=classicmodels
+    volumes:
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - p2-oc-network
+    healthcheck:
+      test: ["CMD", "node", "/app/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  p2-oc-network:
+    driver: bridge
