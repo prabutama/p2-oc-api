@@ -40,11 +40,11 @@ p2-oc-api/
 ## **Persyaratan**
 - **Node.js**: v16 atau lebih baru
 - **MySQL**: Database eksternal dengan konfigurasi:
-  - Host: `165.22.97.18`
+  - Host: `your db host`
   - Port: `3306`
-  - Database: `classicmodels`
-  - User: `kelompok1`
-  - Password: `kelompok1`
+  - Database: `your database`
+  - User: `user`
+  - Password: `user`
 - **Docker**: Untuk menjalankan aplikasi dalam container (opsional)
 
 ---
