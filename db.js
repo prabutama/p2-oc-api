@@ -25,7 +25,6 @@ async function testConnection() {
   }
 }
 
-// Export pool with execute method for controllers
 const db = {
   execute: async (sql, params = []) => {
     return await pool.execute(sql, params);

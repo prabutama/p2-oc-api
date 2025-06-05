@@ -56,10 +56,9 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// --- API ROUTES ---
 const router = express.Router();
 
-// Use the modularized routes
+
 app.use('/api/customers', customersRouter);
 app.use('/api/employees', employeesRouter);
 app.use('/api/offices', officesRouter);
@@ -68,7 +67,6 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/productlines', productlinesRouter);
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -78,7 +76,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
