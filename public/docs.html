@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - P2 OC API</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .docs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .endpoint {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .method {
+            background: #27ae60;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .url {
+            background: #f8f9fa;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            flex: 1;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .response-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin: 40px 0 20px 0;
+        }
+        
+        .back-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="docs-container">
+        <header class="header">
+            <h1><i class="fas fa-book"></i> API Documentation</h1>
+            <p>Dokumentasi lengkap P2 OC API - Classic Models Database</p>
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </header>
+
+        <div class="main-content">
+            <h2 class="section-title">Base URL</h2>
+            <div class="endpoint">
+                <div class="url">http://localhost:3001/api</div>
+                <div class="description">Semua endpoint API menggunakan base URL di atas.</div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-users"></i> Customers Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/customers</span>
+                </div>
+                <div class="description">Mendapatkan semua data customers</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": [
+    {
+      "customerNumber": 103,
+      "customerName": "Atelier graphique",
+      "contactLastName": "Schmitt",
+      "contactFirstName": "Carine",
+      "phone": "40.32.2555",
+      "addressLine1": "54, rue Royale",
+      "city": "Nantes",
+      "country": "France",
+      "creditLimit": 21000.00
+    }
+  ],
+  "count": 122
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/customers/total</span>
+                </div>
+                <div class="description">Mendapatkan total jumlah customers</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": {
+    "total_customers": 122
+  }
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/customers/fullname</span>
+                </div>
+                <div class="description">Mendapatkan customers dengan nama lengkap (gabungan first name dan last name)</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": [
+    {
+      "customerNumber": 103,
+      "customerName": "Atelier graphique",
+      "fullName": "Carine Schmitt",
+      "phone": "40.32.2555",
+      "city": "Nantes",
+      "country": "France"
+    }
+  ]
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/customers/top-country</span>
+                </div>
+                <div class="description">Mendapatkan negara dengan jumlah customers terbanyak</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/customers/highest-credit</span>
+                </div>
+                <div class="description">Mendapatkan customer dengan credit limit tertinggi</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/customers/lowest-credit</span>
+                </div>
+                <div class="description">Mendapatkan customer dengan credit limit terendah</div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-user-tie"></i> Employees Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/employees</span>
+                </div>
+                <div class="description">Mendapatkan semua data employees</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/employees/total</span>
+                </div>
+                <div class="description">Mendapatkan total jumlah employees</div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-building"></i> Offices Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/offices</span>
+                </div>
+                <div class="description">Mendapatkan semua data offices</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/offices/by-country</span>
+                </div>
+                <div class="description">Mendapatkan jumlah offices per negara</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": [
+    {
+      "country": "USA",
+      "Total_Offices": 3
+    },
+    {
+      "country": "France",
+      "Total_Offices": 1
+    }
+  ]
+}
+                </div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-shopping-cart"></i> Orders Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/orders</span>
+                </div>
+                <div class="description">Mendapatkan semua data orders</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/orders/total</span>
+                </div>
+                <div class="description">Mendapatkan total jumlah orders</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/orders/by-year-month</span>
+                </div>
+                <div class="description">Mendapatkan orders berdasarkan tahun dan bulan</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": [
+    {
+      "Year": 2003,
+      "Month": 1,
+      "Month_Name": "January",
+      "Total_orders": 7,
+      "Sum_Of_Orders": 7
+    }
+  ]
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/orders/shipped</span>
+                </div>
+                <div class="description">Mendapatkan jumlah orders dengan status 'Shipped'</div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-credit-card"></i> Payments Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/payments</span>
+                </div>
+                <div class="description">Mendapatkan semua data payments</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/payments/total-amount</span>
+                </div>
+                <div class="description">Mendapatkan total amount dari semua payments</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": {
+    "Total_Amount": 8853839.23
+  }
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/payments/by-year</span>
+                </div>
+                <div class="description">Mendapatkan payments berdasarkan tahun</div>
+                <div class="response-example">
+{
+  "success": true,
+  "data": [
+    {
+      "Year": 2003,
+      "Total_Amount": 1676851.95,
+      "Sum_Of_Amount": 1676851.95
+    },
+    {
+      "Year": 2004,
+      "Total_Amount": 4313328.25,
+      "Sum_Of_Amount": 5990180.20
+    }
+  ]
+}
+                </div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-box"></i> Products Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/products</span>
+                </div>
+                <div class="description">Mendapatkan semua data products</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/products/total</span>
+                </div>
+                <div class="description">Mendapatkan total jumlah products</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/products/by-line</span>
+                </div>
+                <div class="description">Mendapatkan jumlah products per product line</div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-layer-group"></i> Product Lines Endpoints</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/productlines</span>
+                </div>
+                <div class="description">Mendapatkan semua data product lines</div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/productlines/total</span>
+                </div>
+                <div class="description">Mendapatkan total jumlah product lines</div>
+            </div>
+
+            <h2 class="section-title"><i class="fas fa-heart-pulse"></i> Health Check</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method">GET</span>
+                    <span class="url">/health</span>
+                </div>
+                <div class="description">Mengecek status kesehatan server dan koneksi database</div>
+                <div class="response-example">
+{
+  "status": "healthy",
+  "database": "connected",
+  "uptime": 3600.123,
+  "timestamp": "2024-01-01T12:00:00.000Z",
+  "environment": "development"
+}
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 P2 OC API - Classic Models Database Analysis</p>
+        </footer>
+    </div>
+</body>
+</html>
