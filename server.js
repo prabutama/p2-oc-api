@@ -16,8 +16,18 @@ const productlinesRouter = require('./routes/productlines');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet());
-app.use(cors());
+// Configure helmet with custom settings
+app.use(helmet({
+    crossOriginOpenerPolicy: false, // Disable COOP header
+    crossOriginEmbedderPolicy: false, // Disable COEP header
+    contentSecurityPolicy: false // Disable CSP for development
+}));
+
+app.use(cors({
+    origin: 'http://165.22.97.18:3001',
+    credentials: true
+}));
+
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
