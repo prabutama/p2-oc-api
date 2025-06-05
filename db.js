@@ -25,4 +25,14 @@ async function testConnection() {
   }
 }
 
-module.exports = { getQuery, testConnection };
+// Export pool with execute method for controllers
+const db = {
+  execute: async (sql, params = []) => {
+    return await pool.execute(sql, params);
+  },
+  query: async (sql, params = []) => {
+    return await pool.query(sql, params);
+  }
+};
+
+module.exports = { getQuery, testConnection, ...db };

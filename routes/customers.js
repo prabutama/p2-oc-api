@@ -1,24 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const { getQuery } = require('../db');
+const customersController = require('../controllers/customersController');
 
-// === CUSTOMERS ===
-router.get('/', async (req, res) => {
-  try {
-    const data = await getQuery('SELECT * FROM customers');
-    res.json({ success: true, data });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-router.get('/total', async (req, res) => {
-  try {
-    const data = await getQuery('SELECT count(distinct customerNumber) as total_customers FROM customers');
-    res.json({ success: true, data: data[0] });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-// ...lanjutkan endpoint lain sesuai blok CUSTOMERS di server.js...
+// === CUSTOMERS ROUTES ===
+router.get('/', customersController.getAllCustomers);
+router.get('/total', customersController.getTotalCustomers);
+router.get('/fullname', customersController.getCustomersWithFullName);
+router.get('/top-country', customersController.getHighestCustomersByCountry);
+router.get('/top-city', customersController.getHighestCustomersByCity);
+router.get('/top-state', customersController.getHighestCustomersByState);
+router.get('/without-state', customersController.getCustomersWithoutState);
+router.get('/credit-limit', customersController.getCustomersByCreditLimit);
+router.get('/high-credit', customersController.getHighCreditCustomers);
+router.get('/highest-credit', customersController.getHighestCreditCustomer);
+router.get('/lowest-credit', customersController.getLowestCreditCustomer);
+router.get('/without-sales-rep', customersController.getCustomersWithoutSalesRep);
+router.get('/credit-status', customersController.getCustomerCreditStatus);
+router.get('/contact-names', customersController.getCustomersByContactName);
+router.get('/:customerName/details', customersController.getCustomerDetails);
 
 module.exports = router;

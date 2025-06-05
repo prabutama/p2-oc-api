@@ -10,6 +10,8 @@ const employeesRouter = require('./routes/employees');
 const officesRouter = require('./routes/offices');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
+const productsRouter = require('./routes/products');
+const productlinesRouter = require('./routes/productlines');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -63,6 +65,8 @@ app.use('/api/employees', employeesRouter);
 app.use('/api/offices', officesRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/productlines', productlinesRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

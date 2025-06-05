@@ -1,9 +1,4 @@
-# CATATAN: File ini untuk setup lengkap dengan database internal
-# Untuk database eksternal, gunakan docker-compose.standalone.yml
-
 services:
-
-  # Application Service
   app:
     build:
       context: .
