@@ -1,5 +1,5 @@
-// API Base URL
-const API_BASE_URL = window.location.origin;
+// API Base URL - detect current origin and handle localhost properly
+const API_BASE_URL = window.location.protocol + '//' + window.location.host;
 
 // Global state
 let currentSection = 'customers';
