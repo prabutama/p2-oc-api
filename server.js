@@ -17,17 +17,15 @@ const productlinesRouter = require('./routes/productlines');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configure helmet with disabled problematic headers
 app.use(helmet({
     crossOriginOpenerPolicy: false,
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: false,
-    contentSecurityPolicy: false // Disable CSP for development
+    contentSecurityPolicy: false 
 }));
 
-// Configure CORS with simpler settings
 app.use(cors({
-    origin: true, // Allow all origins in development
+    origin: true, 
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -37,15 +35,12 @@ app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from public directory
 app.use(express.static('public'));
 
-// Root route - redirect to dashboard
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API info route
 app.get('/api', (req, res) => {
   res.json({
     message: 'P2 OC API - Classic Models Database Analysis',
@@ -62,7 +57,8 @@ app.get('/api', (req, res) => {
       orders: '/api/orders',
       payments: '/api/payments',
       products: '/api/products',
-      productlines: '/api/productlines'
+      productlines: '/api/productlines',
+      procedures: '/api/procedures'
     }
   });
 });
