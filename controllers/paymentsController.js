@@ -219,22 +219,23 @@ class PaymentsController {
     async getTopPayingCustomers(req, res) {
         try {
             const { limit = 10 } = req.query;
-            const [rows] = await db.execute(`
-                SELECT c.customerNumber, c.customerName, 
+            const limitValue = parseInt(limit);
+            const [rows] = await db.execute(
+                `SELECT c.customerNumber, c.customerName, 
                        SUM(p.amount) AS Total_Payment,
                        COUNT(p.checkNumber) AS Payment_Count
                 FROM customers c
                 JOIN payments p ON c.customerNumber = p.customerNumber
                 GROUP BY c.customerNumber, c.customerName
                 ORDER BY Total_Payment DESC
-                LIMIT ?
-            `, [parseInt(limit)]);
+                LIMIT ` + limitValue
+            );
             
             res.json({ 
                 success: true, 
                 data: rows,
                 count: rows.length,
-                limit: parseInt(limit)
+                limit: limitValue
             });
         } catch (error) {
             res.status(500).json({ 

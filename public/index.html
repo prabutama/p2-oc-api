@@ -6,6 +6,11 @@
     <title>P2 OC API - Classic Models Database</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Highcharts Library -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 </head>
 <body>
     <div class="container">
@@ -40,6 +45,9 @@
             <button class="nav-btn" data-section="productlines">
                 <i class="fas fa-layer-group"></i> Product Lines
             </button>
+            <a href="/dashboard" class="nav-btn" style="text-decoration: none; background: #e74c3c;">
+                <i class="fas fa-chart-bar"></i> Analytics Dashboard
+            </a>
         </nav>
 
         <main class="main-content">
@@ -60,6 +68,12 @@
                         <h3>Top City</h3>
                         <div class="stat-value" id="topCity">Loading...</div>
                     </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <h4><i class="fas fa-chart-pie"></i> Customer Distribution by Country</h4>
+                    <div id="customersChart" style="height: 400px;"></div>
                 </div>
 
                 <div class="data-section">
@@ -185,6 +199,12 @@
                     </div>
                 </div>
 
+                <!-- Chart Container -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <h4><i class="fas fa-chart-line"></i> Orders Trend Over Time</h4>
+                    <div id="ordersChart" style="height: 400px;"></div>
+                </div>
+
                 <div class="data-section">
                     <div class="section-header">
                         <h3>Orders by Year and Month</h3>
@@ -220,6 +240,12 @@
                         <h3>Total Amount</h3>
                         <div class="stat-value" id="totalAmount">Loading...</div>
                     </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <h4><i class="fas fa-chart-bar"></i> Revenue by Year</h4>
+                    <div id="paymentsChart" style="height: 400px;"></div>
                 </div>
 
                 <div class="data-section">
@@ -259,6 +285,12 @@
                         <h3>Total Vendors</h3>
                         <div class="stat-value" id="totalVendors">Loading...</div>
                     </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <h4><i class="fas fa-chart-bar"></i> Products Distribution by Category</h4>
+                    <div id="productsChart" style="height: 400px;"></div>
                 </div>
 
                 <div class="data-section">

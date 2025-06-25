@@ -81,6 +81,28 @@ class CustomersController {
         }
     }
 
+    // Get customers distribution by all countries
+    async getCustomersDistributionByCountry(req, res) {
+        try {
+            const [rows] = await db.execute(`
+                SELECT Country, COUNT(*) AS Total_Customers
+                FROM customers
+                GROUP BY country
+                ORDER BY Total_Customers DESC
+            `);
+            res.json({ 
+                success: true, 
+                data: rows,
+                count: rows.length
+            });
+        } catch (error) {
+            res.status(500).json({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    }
+
     // Get highest customers by city
     async getHighestCustomersByCity(req, res) {
         try {

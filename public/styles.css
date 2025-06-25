@@ -360,6 +360,46 @@ tbody tr:nth-child(even):hover {
     margin: 15px 0;
 }
 
+/* Chart Containers */
+.chart-container, .card {
+    position: relative;
+}
+
+.chart-container .loading-chart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #7f8c8d;
+    font-size: 1.1em;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.chart-container .loading-chart i {
+    margin-right: 10px;
+}
+
+/* Chart specific styling */
+#customersChart, #ordersChart, #paymentsChart, #productsChart {
+    min-height: 400px;
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* Responsive charts */
+@media (max-width: 768px) {
+    .chart-container {
+        min-height: 300px;
+    }
+    
+    #customersChart, #ordersChart, #paymentsChart, #productsChart {
+        min-height: 250px !important;
+        height: 250px !important;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {

@@ -13,6 +13,7 @@ const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
 const productsRouter = require('./routes/products');
 const productlinesRouter = require('./routes/productlines');
+const dashboardRouter = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,6 +59,7 @@ app.get('/api', (req, res) => {
       payments: '/api/payments',
       products: '/api/products',
       productlines: '/api/productlines',
+      dashboard: '/api/dashboard',
       procedures: '/api/procedures'
     }
   });
@@ -65,7 +67,7 @@ app.get('/api', (req, res) => {
 
 // Dashboard route
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Documentation route
@@ -103,6 +105,7 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/productlines', productlinesRouter);
+app.use('/api/dashboard', dashboardRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

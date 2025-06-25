@@ -69,11 +69,20 @@ function switchSection(sectionName) {
     
     // Load section data
     loadSectionData(sectionName);
+    
+    // Load charts for this section
+    setTimeout(() => {
+        initializeChartsForSection(sectionName);
+    }, 100);
 }
 
 // Load initial data
 async function loadInitialData() {
     await loadCustomersData();
+    // Load initial chart for customers section
+    setTimeout(() => {
+        initializeChartsForSection('customers');
+    }, 500);
 }
 
 // Load data for specific section
@@ -492,6 +501,188 @@ async function loadProductLines() {
         }
     } catch (error) {
         showTableError('productLinesData', 2);
+    }
+}
+
+// === CHART FUNCTIONS FOR MAIN DASHBOARD ===
+
+// Initialize Highcharts charts for a section
+function initializeChartsForSection(section) {
+    switch(section) {
+        case 'customers':
+            loadCustomersChart();
+            break;
+        case 'orders':
+            loadOrdersChart();
+            break;
+        case 'payments':
+            loadPaymentsChart();
+            break;
+        case 'products':
+            loadProductsChart();
+            break;
+        default:
+            break;
+    }
+}
+
+// Load customers pie chart
+async function loadCustomersChart() {
+    try {
+        const response = await apiCall('/api/customers/top-country');
+        if (response.success && response.data) {
+            const chartContainer = document.getElementById('customersChart');
+            if (chartContainer) {
+                const chartData = response.data.slice(0, 10).map(item => ({
+                    name: item.Country,
+                    y: item.Total_customers
+                }));
+
+                Highcharts.chart('customersChart', {
+                    chart: { type: 'pie', height: 300 },
+                    title: { text: 'Top 10 Countries by Customers' },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b>: {point.percentage:.1f}%'
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Customers',
+                        colorByPoint: true,
+                        data: chartData
+                    }]
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading customers chart:', error);
+    }
+}
+
+// Load orders line chart
+async function loadOrdersChart() {
+    try {
+        const response = await apiCall('/api/orders/by-year-month');
+        if (response.success && response.data) {
+            const chartContainer = document.getElementById('ordersChart');
+            if (chartContainer) {
+                const categories = response.data.map(item => `${item.Year}-${String(item.Month).padStart(2, '0')}`);
+                const orderCounts = response.data.map(item => item.Total_orders);
+
+                Highcharts.chart('ordersChart', {
+                    chart: { type: 'line', height: 300 },
+                    title: { text: 'Orders Trend Over Time' },
+                    xAxis: {
+                        categories: categories,
+                        title: { text: 'Year-Month' }
+                    },
+                    yAxis: {
+                        title: { text: 'Number of Orders' }
+                    },
+                    series: [{
+                        name: 'Orders',
+                        data: orderCounts,
+                        color: '#3498db'
+                    }]
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading orders chart:', error);
+    }
+}
+
+// Load payments column chart
+async function loadPaymentsChart() {
+    try {
+        const response = await apiCall('/api/payments/by-year');
+        if (response.success && response.data) {
+            const chartContainer = document.getElementById('paymentsChart');
+            if (chartContainer) {
+                const years = response.data.map(item => item.Year.toString());
+                const amounts = response.data.map(item => item.Total_Amount);
+
+                Highcharts.chart('paymentsChart', {
+                    chart: { type: 'column', height: 300 },
+                    title: { text: 'Revenue by Year' },
+                    xAxis: {
+                        categories: years,
+                        title: { text: 'Year' }
+                    },
+                    yAxis: {
+                        title: { text: 'Revenue ($)' },
+                        labels: {
+                            formatter: function() {
+                                return '$' + (this.value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>' + this.x + '</b><br/>' +
+                                this.series.name + ': $' + formatNumber(this.y);
+                        }
+                    },
+                    series: [{
+                        name: 'Revenue',
+                        data: amounts,
+                        color: '#2ecc71'
+                    }]
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading payments chart:', error);
+    }
+}
+
+// Load products bar chart
+async function loadProductsChart() {
+    try {
+        const response = await apiCall('/api/products/by-line');
+        if (response.success && response.data) {
+            const chartContainer = document.getElementById('productsChart');
+            if (chartContainer) {
+                const chartData = response.data.map(item => ({
+                    name: item.productLine,
+                    y: item.Total_Products
+                }));
+
+                Highcharts.chart('productsChart', {
+                    chart: { type: 'bar', height: 300 },
+                    title: { text: 'Products by Category' },
+                    xAxis: {
+                        type: 'category',
+                        title: { text: 'Product Lines' }
+                    },
+                    yAxis: {
+                        title: { text: 'Number of Products' }
+                    },
+                    legend: { enabled: false },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y}'
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Products',
+                        colorByPoint: true,
+                        data: chartData
+                    }]
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading products chart:', error);
     }
 }
 

@@ -7,6 +7,7 @@ router.get('/', customersController.getAllCustomers);
 router.get('/total', customersController.getTotalCustomers);
 router.get('/fullname', customersController.getCustomersWithFullName);
 router.get('/top-country', customersController.getHighestCustomersByCountry);
+router.get('/distribution-by-country', customersController.getCustomersDistributionByCountry);
 router.get('/top-city', customersController.getHighestCustomersByCity);
 router.get('/top-state', customersController.getHighestCustomersByState);
 router.get('/without-state', customersController.getCustomersWithoutState);

@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analytics - P2 OC API</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Highcharts CSS dan JS -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/themes/high-contrast-light.js"></script>
+    <style>
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+        }
+        
+        .chart-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: #2980b9;
+        }
+        
+        .control-btn.active {
+            background: #2c3e50;
+        }
+        
+        .loading-chart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .dashboard-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-btn.active {
+            background: #2c3e50;
+        }
+        
+        /* Dark theme styles */
+        body.dark-theme {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+        }
+        
+        body.dark-theme .dashboard-header {
+            background: rgba(44, 62, 80, 0.95);
+            color: #ecf0f1;
+        }
+        
+        body.dark-theme .stat-card {
+            background: rgba(52, 73, 94, 0.9);
+            color: #ecf0f1;
+        }
+        
+        body.dark-theme .chart-container {
+            background: rgba(52, 73, 94, 0.9);
+            color: #ecf0f1;
+        }
+        
+        body.dark-theme .chart-title {
+            color: #ecf0f1;
+        }
+        
+        /* Animation for loading states */
+        @keyframes chartLoad {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chart-loaded {
+            animation: chartLoad 0.5s ease-out;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .dashboard-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 200px;
+                justify-content: center;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1><i class="fas fa-chart-bar"></i> Dashboard Analytics</h1>
+            <p>Visualisasi Data ClassicModels dengan Grafik Interaktif</p>
+            
+            <!-- Dashboard Controls -->
+            <div class="dashboard-controls" style="margin: 20px 0;">
+                <button class="control-btn" onclick="refreshAllData()">
+                    <i class="fas fa-sync-alt"></i> Refresh All
+                </button>
+                <button class="control-btn" onclick="exportAllCharts()">
+                    <i class="fas fa-download"></i> Export Charts
+                </button>
+                <button class="control-btn" onclick="toggleTheme()">
+                    <i class="fas fa-palette"></i> Toggle Theme
+                </button>
+                <button class="control-btn" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i> Fullscreen
+                </button>
+            </div>
+            
+            <div class="status-indicator" id="dbStatus">
+                <i class="fas fa-circle"></i> 
+                <span>Checking connection...</span>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <section class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCustomers">-</div>
+                <div class="stat-label">Total Customers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalOrders">-</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRevenue">-</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalProducts">-</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+        </section>
+
+        <!-- Charts Grid -->
+        <section class="charts-grid">
+            <!-- Customer Distribution by Country -->
+            <div class="chart-container">
+                <div class="chart-title">Customer Distribution by Country</div>
+                <div id="customersByCountryChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Orders by Year and Month -->
+            <div class="chart-container">
+                <div class="chart-title">Orders Trend by Year-Month</div>
+                <div id="ordersTrendChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Payments by Year -->
+            <div class="chart-container">
+                <div class="chart-title">Revenue by Year</div>
+                <div id="paymentsByYearChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Products by Product Line -->
+            <div class="chart-container">
+                <div class="chart-title">Products Distribution by Category</div>
+                <div id="productsByLineChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Top Customers by Payment -->
+            <div class="chart-container">
+                <div class="chart-title">Top 10 Customers by Payment</div>
+                <div id="topCustomersChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Order Status Distribution -->
+            <div class="chart-container">
+                <div class="chart-title">Order Status Distribution</div>
+                <div id="orderStatusChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Regional Performance -->
+            <div class="chart-container">
+                <div class="chart-title">Regional Performance</div>
+                <div id="regionalPerformanceChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Sales Performance -->
+            <div class="chart-container">
+                <div class="chart-title">Sales Performance (Current Year)</div>
+                <div id="salesPerformanceChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="chart-container">
+                <div class="chart-title">Top 10 Products by Revenue</div>
+                <div id="topProductsChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+
+            <!-- Customer Growth -->
+            <div class="chart-container">
+                <div class="chart-title">Customer Activity by Month</div>
+                <div id="customerGrowthChart" class="loading-chart">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation back to main dashboard -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="control-btn">
+                <i class="fas fa-arrow-left"></i> Back to Main Dashboard
+            </a>
+            <a href="/docs" class="control-btn">
+                <i class="fas fa-book"></i> API Documentation
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE_URL = window.location.protocol + '//' + window.location.host;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loading...');
+            checkDatabaseStatus();
+            loadOverviewStats();
+            loadCharts();
+        });
+
+        // Check database connection
+        async function checkDatabaseStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                const statusElement = document.getElementById('dbStatus');
+                
+                if (data.status === 'healthy') {
+                    statusElement.className = 'status-indicator connected';
+                    statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Database Connected</span>';
+                } else {
+                    statusElement.className = 'status-indicator disconnected';
+                    statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Database Disconnected</span>';
+                }
+            } catch (error) {
+                document.getElementById('dbStatus').className = 'status-indicator disconnected';
+                document.getElementById('dbStatus').innerHTML = '<i class="fas fa-circle"></i> <span>Connection Error</span>';
+            }
+        }
+
+        // Load overview statistics
+        async function loadOverviewStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/overview`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('totalCustomers').textContent = data.data.customers || '-';
+                    document.getElementById('totalOrders').textContent = data.data.orders || '-';
+                    document.getElementById('totalRevenue').textContent = formatCurrency(data.data.revenue || 0);
+                    document.getElementById('totalProducts').textContent = data.data.products || '-';
+                }
+            } catch (error) {
+                console.error('Error loading overview stats:', error);
+            }
+        }
+
+        // Load all charts
+        function loadCharts() {
+            loadCustomersByCountryChart();
+            loadOrdersTrendChart();
+            loadPaymentsByYearChart();
+            loadProductsByLineChart();
+            loadTopCustomersChart();
+            loadOrderStatusChart();
+            loadRegionalPerformanceChart();
+            loadSalesPerformanceChart();
+            loadTopProductsChart();
+            loadCustomerGrowthChart();
+        }
+
+        // Customer Distribution by Country Chart
+        async function loadCustomersByCountryChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/customers/distribution-by-country`);
+                const data = await response.json();
+                
+                const chartData = data.data.map(item => ({
+                    name: item.Country,
+                    y: item.Total_Customers
+                }));
+
+                Highcharts.chart('customersByCountryChart', {
+                    chart: {
+                        type: 'pie',
+                        events: {
+                            load: function() {
+                                this.container.parentNode.classList.add('chart-loaded');
+                            }
+                        }
+                    },
+                    title: {
+                        text: null
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Count: <b>{point.y}</b>'
+                    },
+                    accessibility: {
+                        point: {
+                            valueSuffix: '%'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                            },
+                            showInLegend: true
+                        }
+                    },
+                    series: [{
+                        name: 'Customers',
+                        colorByPoint: true,
+                        data: chartData
+                    }],
+                    exporting: {
+                        enabled: true,
+                        buttons: {
+                            contextButton: {
+                                menuItems: ['viewFullscreen', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG']
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                document.getElementById('customersByCountryChart').innerHTML = '<div style="text-align: center; color: #e74c3c; padding: 50px;"><i class="fas fa-exclamation-triangle"></i><br/>Error loading chart</div>';
+            }
+        }
+
+        // Orders Trend Chart
+        async function loadOrdersTrendChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/orders/by-year-month`);
+                const data = await response.json();
+                
+                const categories = data.data.map(item => `${item.Year}-${String(item.Month).padStart(2, '0')}`);
+                const orderCounts = data.data.map(item => item.Total_orders);
+
+                Highcharts.chart('ordersTrendChart', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: categories,
+                        title: {
+                            text: 'Year-Month'
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Number of Orders'
+                        }
+                    },
+                    plotOptions: {
+                        line: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            enableMouseTracking: true
+                        }
+                    },
+                    series: [{
+                        name: 'Orders',
+                        data: orderCounts,
+                        color: '#3498db'
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('ordersTrendChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Payments by Year Chart
+        async function loadPaymentsByYearChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/payments/by-year`);
+                const data = await response.json();
+                
+                const years = data.data.map(item => item.Year.toString());
+                const amounts = data.data.map(item => parseFloat(item.Total_Amount));
+
+                Highcharts.chart('paymentsByYearChart', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: years,
+                        title: {
+                            text: 'Year'
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Revenue ($)'
+                        },
+                        labels: {
+                            formatter: function() {
+                                return '$' + (this.value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>' + this.x + '</b><br/>' +
+                                this.series.name + ': $' + Highcharts.numberFormat(this.y, 0);
+                        }
+                    },
+                    series: [{
+                        name: 'Revenue',
+                        data: amounts,
+                        color: '#2ecc71'
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('paymentsByYearChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Products by Line Chart
+        async function loadProductsByLineChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/products/by-line`);
+                const data = await response.json();
+                
+                const chartData = data.data.map(item => ({
+                    name: item.productLine,
+                    y: item.Total_Products
+                }));
+
+                Highcharts.chart('productsByLineChart', {
+                    chart: {
+                        type: 'bar'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        type: 'category',
+                        title: {
+                            text: 'Product Lines'
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Number of Products'
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y}'
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Products',
+                        colorByPoint: true,
+                        data: chartData
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('productsByLineChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Top Customers Chart
+        async function loadTopCustomersChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/payments/top-customers`);
+                const data = await response.json();
+                
+                // Take top 10 only
+                const topCustomers = data.data.slice(0, 10);
+                const customerNames = topCustomers.map(item => item.customerName || `Customer ${item.customerNumber}`);
+                const payments = topCustomers.map(item => parseFloat(item.Total_Payment));
+
+                Highcharts.chart('topCustomersChart', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: customerNames,
+                        title: {
+                            text: 'Customers'
+                        },
+                        labels: {
+                            rotation: -45,
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total Payment ($)'
+                        },
+                        labels: {
+                            formatter: function() {
+                                return '$' + (this.value / 1000).toFixed(0) + 'K';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>' + this.x + '</b><br/>' +
+                                'Payment: $' + Highcharts.numberFormat(this.y, 0);
+                        }
+                    },
+                    series: [{
+                        name: 'Payment',
+                        data: payments,
+                        color: '#f39c12'
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('topCustomersChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Top Products Chart
+        async function loadTopProductsChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/top-products`);
+                const data = await response.json();
+                
+                const productNames = data.data.map(item => item.productName);
+                const revenues = data.data.map(item => parseFloat(item.total_revenue));
+
+                Highcharts.chart('topProductsChart', {
+                    chart: {
+                        type: 'bar'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: productNames,
+                        title: {
+                            text: 'Products'
+                        },
+                        labels: {
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Revenue ($)'
+                        },
+                        labels: {
+                            formatter: function() {
+                                return '$' + (this.value / 1000).toFixed(0) + 'K';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>' + this.x + '</b><br/>' +
+                                'Revenue: $' + Highcharts.numberFormat(this.y, 0);
+                        }
+                    },
+                    series: [{
+                        name: 'Revenue',
+                        data: revenues,
+                        color: '#e67e22'
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('topProductsChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Customer Growth Chart
+        async function loadCustomerGrowthChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/customer-growth`);
+                const data = await response.json();
+                
+                const categories = data.data.map(item => `${item.order_year}-${String(item.order_month).padStart(2, '0')}`);
+                const customerCounts = data.data.map(item => item.customers_with_orders);
+
+                Highcharts.chart('customerGrowthChart', {
+                    chart: {
+                        type: 'area'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: categories,
+                        title: {
+                            text: 'Year-Month'
+                        },
+                        labels: {
+                            rotation: -45,
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Active Customers'
+                        }
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>' + this.x + '</b><br/>' +
+                                'Active Customers: ' + this.y;
+                        }
+                    },
+                    plotOptions: {
+                        area: {
+                            fillColor: {
+                                linearGradient: {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 0,
+                                    y2: 1
+                                },
+                                stops: [
+                                    [0, '#1abc9c'],
+                                    [1, 'rgba(26, 188, 156, 0.1)']
+                                ]
+                            },
+                            marker: {
+                                radius: 2
+                            },
+                            lineWidth: 1,
+                            states: {
+                                hover: {
+                                    lineWidth: 1
+                                }
+                            },
+                            threshold: null
+                        }
+                    },
+                    series: [{
+                        name: 'Active Customers',
+                        data: customerCounts,
+                        color: '#1abc9c'
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('customerGrowthChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Order Status Chart
+        async function loadOrderStatusChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/order-status`);
+                const data = await response.json();
+                
+                const chartData = data.data.map(item => ({
+                    name: item.status,
+                    y: item.count
+                }));
+
+                Highcharts.chart('orderStatusChart', {
+                    chart: {
+                        type: 'pie'
+                    },
+                    title: {
+                        text: null
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Count: <b>{point.y}</b>'
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b>: {point.y}'
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Orders',
+                        colorByPoint: true,
+                        data: chartData
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('orderStatusChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Regional Performance Chart
+        async function loadRegionalPerformanceChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/regional-performance`);
+                const data = await response.json();
+                
+                const countries = data.data.map(item => item.country);
+                const payments = data.data.map(item => parseFloat(item.total_payments));
+
+                Highcharts.chart('regionalPerformanceChart', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: countries,
+                        title: {
+                            text: 'Country'
+                        },
+                        labels: {
+                            rotation: -45,
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total Payments ($)'
+                        },
+                        labels: {
+                            formatter: function() {
+                                return '$' + (this.value / 1000).toFixed(0) + 'K';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>' + this.x + '</b><br/>' +
+                                'Total Payments: $' + Highcharts.numberFormat(this.y, 0);
+                        }
+                    },
+                    series: [{
+                        name: 'Payments',
+                        data: payments,
+                        color: '#9b59b6'
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('regionalPerformanceChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Sales Performance Chart
+        async function loadSalesPerformanceChart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/sales-performance`);
+                const data = await response.json();
+                
+                const months = data.data.map(item => item.month_name);
+                const orders = data.data.map(item => item.total_orders);
+                const sales = data.data.map(item => parseFloat(item.total_sales));
+
+                Highcharts.chart('salesPerformanceChart', {
+                    chart: {
+                        zoomType: 'xy'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: [{
+                        categories: months,
+                        crosshair: true
+                    }],
+                    yAxis: [{ // Primary yAxis
+                        labels: {
+                            format: '{value}',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            }
+                        },
+                        title: {
+                            text: 'Number of Orders',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            }
+                        }
+                    }, { // Secondary yAxis
+                        title: {
+                            text: 'Sales Revenue ($)',
+                            style: {
+                                color: Highcharts.getOptions().colors[0]
+                            }
+                        },
+                        labels: {
+                            format: '${value}',
+                            style: {
+                                color: Highcharts.getOptions().colors[0]
+                            }
+                        },
+                        opposite: true
+                    }],
+                    tooltip: {
+                        shared: true
+                    },
+                    series: [{
+                        name: 'Sales Revenue',
+                        type: 'column',
+                        yAxis: 1,
+                        data: sales,
+                        tooltip: {
+                            valueSuffix: ' $'
+                        }
+                    }, {
+                        name: 'Orders',
+                        type: 'spline',
+                        data: orders,
+                        tooltip: {
+                            valueSuffix: ' orders'
+                        }
+                    }]
+                });
+            } catch (error) {
+                document.getElementById('salesPerformanceChart').innerHTML = '<div style="text-align: center; color: #e74c3c;">Error loading chart</div>';
+            }
+        }
+
+        // Dashboard control functions
+        function refreshAllData() {
+            console.log('Refreshing all data...');
+            loadOverviewStats();
+            loadCharts();
+            
+            // Show feedback
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        function exportAllCharts() {
+            console.log('Exporting all charts...');
+            
+            // Get all Highcharts instances and export them
+            Highcharts.charts.forEach((chart, index) => {
+                if (chart && chart.exportChart) {
+                    setTimeout(() => {
+                        chart.exportChart({
+                            type: 'image/png',
+                            filename: `chart-${index + 1}-${new Date().getTime()}`
+                        });
+                    }, index * 500); // Stagger exports
+                }
+            });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            
+            // Update Highcharts theme
+            const isDark = document.body.classList.contains('dark-theme');
+            if (isDark) {
+                Highcharts.theme = {
+                    colors: ['#2b908f', '#90ee7e', '#f45b5b', '#7798BF', '#aaeeee', '#ff0066',
+                        '#eeaaee', '#55BF3B', '#DF5353', '#7798BF', '#aaeeee'],
+                    chart: {
+                        backgroundColor: 'rgba(52, 73, 94, 0.9)',
+                        style: {
+                            fontFamily: '\'Unica One\', sans-serif'
+                        },
+                        plotBorderColor: '#606063'
+                    },
+                    title: {
+                        style: {
+                            color: '#E0E0E3',
+                            textTransform: 'uppercase',
+                            fontSize: '20px'
+                        }
+                    },
+                    subtitle: {
+                        style: {
+                            color: '#E0E0E3',
+                            textTransform: 'uppercase'
+                        }
+                    },
+                    xAxis: {
+                        gridLineColor: '#707073',
+                        labels: {
+                            style: {
+                                color: '#E0E0E3'
+                            }
+                        },
+                        lineColor: '#707073',
+                        minorGridLineColor: '#505053',
+                        tickColor: '#707073',
+                        title: {
+                            style: {
+                                color: '#A0A0A3'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        gridLineColor: '#707073',
+                        labels: {
+                            style: {
+                                color: '#E0E0E3'
+                            }
+                        },
+                        lineColor: '#707073',
+                        minorGridLineColor: '#505053',
+                        tickColor: '#707073',
+                        tickWidth: 1,
+                        title: {
+                            style: {
+                                color: '#A0A0A3'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        style: {
+                            color: '#F0F0F0'
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            dataLabels: {
+                                color: '#B0B0B3'
+                            },
+                            marker: {
+                                lineColor: '#333'
+                            }
+                        },
+                        boxplot: {
+                            fillColor: '#505053'
+                        },
+                        candlestick: {
+                            lineColor: 'white'
+                        },
+                        errorbar: {
+                            color: 'white'
+                        }
+                    },
+                    legend: {
+                        itemStyle: {
+                            color: '#E0E0E3'
+                        },
+                        itemHoverStyle: {
+                            color: '#FFF'
+                        },
+                        itemHiddenStyle: {
+                            color: '#606063'
+                        }
+                    },
+                    credits: {
+                        style: {
+                            color: '#666'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            color: '#707073'
+                        }
+                    },
+                    drilldown: {
+                        activeAxisLabelStyle: {
+                            color: '#F0F0F3'
+                        },
+                        activeDataLabelStyle: {
+                            color: '#F0F0F3'
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            symbolStroke: '#DDDDDD',
+                            theme: {
+                                fill: '#505053'
+                            }
+                        }
+                    },
+                    rangeSelector: {
+                        buttonTheme: {
+                            fill: '#505053',
+                            stroke: '#000000',
+                            style: {
+                                color: '#CCC'
+                            },
+                            states: {
+                                hover: {
+                                    fill: '#707073',
+                                    stroke: '#000000',
+                                    style: {
+                                        color: 'white'
+                                    }
+                                },
+                                select: {
+                                    fill: '#000003',
+                                    stroke: '#000000',
+                                    style: {
+                                        color: 'white'
+                                    }
+                                }
+                            }
+                        },
+                        inputBoxBorderColor: '#505053',
+                        inputStyle: {
+                            backgroundColor: '#333',
+                            color: 'silver'
+                        },
+                        labelStyle: {
+                            color: 'silver'
+                        }
+                    },
+                    navigator: {
+                        handles: {
+                            backgroundColor: '#666',
+                            borderColor: '#AAA'
+                        },
+                        outlineColor: '#CCC',
+                        maskFill: 'rgba(255,255,255,0.1)',
+                        series: {
+                            color: '#7798BF',
+                            lineColor: '#A6C7ED'
+                        },
+                        xAxis: {
+                            gridLineColor: '#505053'
+                        }
+                    },
+                    scrollbar: {
+                        barBackgroundColor: '#808083',
+                        barBorderColor: '#808083',
+                        buttonArrowColor: '#CCC',
+                        buttonBackgroundColor: '#606063',
+                        buttonBorderColor: '#606063',
+                        rifleColor: '#FFF',
+                        trackBackgroundColor: '#404043',
+                        trackBorderColor: '#404043'
+                    },
+                    legendBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    background2: '#505053',
+                    dataLabelsColor: '#B0B0B3',
+                    textColor: '#C0C0C0',
+                    contrastTextColor: '#F0F0F3',
+                    maskColor: 'rgba(255,255,255,0.3)'
+                };
+                
+                // Apply the theme
+                Highcharts.setOptions(Highcharts.theme);
+            } else {
+                // Reset to default theme
+                Highcharts.setOptions(Highcharts.defaultOptions);
+            }
+            
+            // Reload charts with new theme
+            setTimeout(() => {
+                loadCharts();
+            }, 100);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Helper function to format currency
+        function formatCurrency(amount) {
+            if (amount >= 1000000) {
+                return '$' + (amount / 1000000).toFixed(1) + 'M';
+            } else if (amount >= 1000) {
+                return '$' + (amount / 1000).toFixed(0) + 'K';
+            } else {
+                return '$' + amount.toFixed(0);
+            }
+        }
+
+        // Auto refresh every 5 minutes
+        setInterval(() => {
+            checkDatabaseStatus();
+            loadOverviewStats();
+        }, 300000);
+
+        // DEBUG: Check chart status
+        function checkChartsStatus() {
+            const chartContainers = [
+                'customersByCountryChart',
+                'ordersTrendChart', 
+                'paymentsByYearChart',
+                'productsByLineChart',
+                'topCustomersChart',
+                'orderStatusChart',
+                'regionalPerformanceChart',
+                'salesPerformanceChart',
+                'topProductsChart',
+                'customerGrowthChart'
+            ];
+
+            console.log('=== CHART STATUS REPORT ===');
+            
+            chartContainers.forEach(chartId => {
+                const element = document.getElementById(chartId);
+                if (element) {
+                    const hasHighchart = element.querySelector('.highcharts-container');
+                    const hasError = element.innerHTML.includes('Error');
+                    const isLoading = element.innerHTML.includes('Loading');
+                    
+                    let status = 'UNKNOWN';
+                    if (hasHighchart) status = '✅ LOADED';
+                    else if (hasError) status = '❌ ERROR';
+                    else if (isLoading) status = '🔄 LOADING';
+                    
+                    console.log(`${chartId}: ${status}`);
+                } else {
+                    console.log(`${chartId}: ❌ ELEMENT NOT FOUND`);
+                }
+            });
+            
+            console.log('=========================');
+        }
+
+        // Run chart check after load
+        setTimeout(checkChartsStatus, 3000);
+        setTimeout(checkChartsStatus, 10000);
+    </script>
+</body>
+</html>
